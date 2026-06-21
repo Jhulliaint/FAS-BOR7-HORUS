@@ -194,19 +194,103 @@ def compute(path, month, year, vat_rate, rate_pap=0.05, rate_bespoke=0.025,
     }
 
 
+# ---------------------------------------------------------------------------
+# Hong Kong / Asia-Pacific profile
+# No Bespoke/PAP split. Base = COMBINED in-month encaissement (no tax) per staff.
+# Commission = personal (turnover x per-staff rate) + store pool (tiered by % of
+# store target) for salespeople; the manager gets a store-based rate instead.
+# ---------------------------------------------------------------------------
+DEFAULT_HK = {
+    "manager": "",
+    "store_target": 0,
+    "personal_rate": {},          # {STAFF: rate}
+    "target": {},                 # {STAFF: target$} — informational
+    "pool_tiers": [[0.60, 0.003], [0.80, 0.008], [1.00, 0.015], [None, 0.022]],
+    "jl_rate_reached": 0.014,
+    "jl_rate_not": 0.008,
+}
+
+
+def commission_hk(turnover, cfg):
+    """turnover: {STAFF_UPPER: combined_no_tax_turnover}. Returns the HK commission breakdown."""
+    c = {**DEFAULT_HK, **cfg}
+    manager = (c["manager"] or "").upper()
+    store_target = float(c["store_target"] or 0)
+    personal_rate = {k.upper(): v for k, v in c.get("personal_rate", {}).items()}
+    tiers = c["pool_tiers"]
+    store = round(sum(turnover.values()), 2)
+    pct = (store / store_target) if store_target else 0.0
+
+    def pool_rate(p):
+        for thr, rate in tiers:
+            if thr is None or p < thr:
+                return rate
+        return tiers[-1][1]
+
+    prate = pool_rate(pct)
+    pool = round(store * prate, 3)
+    reached = pct >= 1.0
+    jl = round(store * (c["jl_rate_reached"] if reached else c["jl_rate_not"]), 3)
+
+    rows = []
+    for s, t in sorted(turnover.items(), key=lambda kv: -kv[1]):
+        if s == manager:
+            personal, extra, basis = 0.0, jl, "manager (store)"
+        else:
+            personal, extra, basis = round(t * personal_rate.get(s, 0.0), 3), pool, "pool (store)"
+        rows.append({"staff": s, "turnover": round(t, 2), "personal": personal,
+                     "pool_or_manager": extra, "basis": basis, "total": round(personal + extra, 3)})
+    return {
+        "profile": "hk", "store_turnover": store, "store_target": store_target,
+        "store_pct": round(pct, 4), "store_target_reached": reached,
+        "pool_rate": prate, "pool_commission": pool,
+        "manager": manager, "manager_commission": jl,
+        "staff": rows, "total_commission": round(sum(r["total"] for r in rows), 3),
+    }
+
+
 def main():
     ap = argparse.ArgumentParser(description="Cross-check monthly sales commissions from a Detailed sales workbook.")
     ap.add_argument("file")
     ap.add_argument("--month", type=int, required=True)
     ap.add_argument("--year", type=int, default=datetime.now().year)
-    ap.add_argument("--vat", type=float, default=0.20, help="VAT rate, e.g. 0.20 (use 0 for HKD)")
+    ap.add_argument("--profile", choices=["europe", "hk"], default="europe",
+                    help="europe = PAP/Bespoke split; hk = personal + store-pool tiers + manager")
+    ap.add_argument("--vat", type=float, default=None,
+                    help="VAT rate, e.g. 0.20. Defaults: europe=0.20, hk=0 (HKD).")
     ap.add_argument("--pap", type=float, default=0.05)
     ap.add_argument("--bespoke", type=float, default=0.025)
+    ap.add_argument("--hk-config", help="JSON file with HK scheme params (see hk_config.example.json)")
     ap.add_argument("--sheet", default="Detailed sales")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args()
+    vat = a.vat if a.vat is not None else (0.0 if a.profile == "hk" else 0.20)
 
-    res = compute(a.file, a.month, a.year, a.vat, a.pap, a.bespoke, a.sheet)
+    res = compute(a.file, a.month, a.year, vat, a.pap, a.bespoke, a.sheet)
+
+    if a.profile == "hk":
+        cfg = {}
+        if a.hk_config:
+            with open(a.hk_config, encoding="utf-8") as f:
+                cfg = json.load(f)
+        turnover = {r["staff"].upper(): round(r["ca_pap_ht"] + r["ca_bespoke_ht"], 2)
+                    for r in res["staff"]}
+        hk = commission_hk(turnover, cfg)
+        if a.json:
+            print(json.dumps({"base": res, "hk": hk}, ensure_ascii=False, indent=2))
+            return
+        print(f"HK profile — Period {a.month}/{a.year} (VAT {vat})  |  columns: {res['columns']}")
+        print(f"Store turnover={hk['store_turnover']:,.2f}  target={hk['store_target']:,.0f}  "
+              f"reached={hk['store_pct']:.1%} ({'YES' if hk['store_target_reached'] else 'no'})  "
+              f"pool_rate={hk['pool_rate']}  manager={hk['manager'] or '(none)'}")
+        print(f"\n{'STAFF':<14}{'TURNOVER':>14}{'PERSONAL':>13}{'POOL/MGR':>13}{'TOTAL':>13}  basis")
+        for r in hk["staff"]:
+            print(f"{r['staff'][:14]:<14}{r['turnover']:>14,.2f}{r['personal']:>13,.2f}"
+                  f"{r['pool_or_manager']:>13,.2f}{r['total']:>13,.2f}  {r['basis']}")
+        print(f"{'TOTAL':<14}{hk['store_turnover']:>14,.2f}{'':>13}{'':>13}{hk['total_commission']:>13,.2f}")
+        print(f"\nControl: {res['control']}  | gift vouchers excluded (net): {res['excluded_gift_voucher_amount']:.2f}")
+        return
+
     if a.json:
         print(json.dumps(res, ensure_ascii=False, indent=2))
         return
@@ -215,7 +299,7 @@ def main():
         print(f"⚠ MISSING required columns: {res['missing_required_columns']} — confirm with the user.")
     cur = res["currency_column_values"]
     print(f"Currency column: {cur if cur else '(none — confirm currency with the user)'}")
-    print(f"Period: {a.month}/{a.year}  | rates PAP={a.pap} Bespoke={a.bespoke} VAT={a.vat}")
+    print(f"Period: {a.month}/{a.year}  | rates PAP={a.pap} Bespoke={a.bespoke} VAT={vat}")
     print(f"\n{'STAFF':<22}{'CA_PAP_HT':>15}{'CA_BESP_HT':>15}{'COMMISSION':>15}")
     for r in res["staff"]:
         print(f"{r['staff'][:22]:<22}{r['ca_pap_ht']:>15,.2f}{r['ca_bespoke_ht']:>15,.2f}{r['commission']:>15,.2f}")

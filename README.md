@@ -13,7 +13,7 @@ est généré automatiquement à chaque release.
 
 | Skill | Rôle | Dossier |
 |---|---|---|
-| `commissions-detailed-sales` | Calcule/vérifie les commissions mensuelles des vendeurs depuis un fichier *Detailed sales* (multi-devises, Bespoke/PAP, colonnage variable), dans Excel. | [`skills/commissions-detailed-sales/`](skills/commissions-detailed-sales/) |
+| `commissions-detailed-sales` | Calcule/vérifie les commissions mensuelles des vendeurs depuis un fichier *Detailed sales* (multi-devises, colonnage variable), dans Excel. Deux profils : **Europe** (PAP/Bespoke) et **Hong Kong** (personnel + pool magasin + manager). | [`skills/commissions-detailed-sales/`](skills/commissions-detailed-sales/) |
 
 ## Structure
 

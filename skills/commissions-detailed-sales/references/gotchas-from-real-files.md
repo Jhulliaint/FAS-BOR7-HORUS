@@ -35,9 +35,9 @@ méthode (formules + `verify_commissions.py`).
    Sans importance pour le partage Bespoke/PAP : tout ce qui **n'est pas** `bespoke`
    tombe en **PAP**. → robuste par construction.
 
-9. **`Petite mesure` (Hong Kong, 86 lignes).** Catégorie sur-mesure ambiguë (Bespoke ?
-   PAP ?). Par défaut comptée en **PAP** mais **signalée** : demander à l'utilisateur si
-   elle doit prendre le **taux Bespoke**.
+9. **`Petite mesure` (Hong Kong, 86 lignes).** Catégorie sur-mesure ambiguë. **Sans objet
+   pour Hong Kong** (profil hk = CA combiné, aucun partage PAP/Bespoke). Ne concerne que
+   le profil **Europe** : par défaut **PAP**, mais **signalée** (demander si taux Bespoke).
 
 10. **Noms de vendeurs incohérents** : casse (`SONY`/`Sony`/`sony`/`sONY`,
     `Rodolphe`/`RODOLPHE`/`rODOLPHE`) et doubles espaces (`Samuel  Volney`). Sans
