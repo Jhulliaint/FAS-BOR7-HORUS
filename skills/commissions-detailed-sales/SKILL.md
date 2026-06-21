@@ -78,9 +78,10 @@ Choisir le **profil** (europe / hk — cf. « Deux profils »).
   Hors-€ → proposer mais **confirmer**.
 - Profil **europe** : **TAUX** PAP **5 %**, Bespoke **2,5 %** (utilisé seulement s'il
   existe des lignes Bespoke) ; éventuelle commission atelier sur Bespoke si mentionnée.
-- Profil **hk** : **objectif magasin**, **taux perso par vendeur**, **manager**, paliers
-  pool (0,3/0,8/1,5/2,2 %) et taux manager (1,4 % atteint / 0,8 % sinon). La plupart
-  viennent de la légende `Comm MM YYYY` du payroll ; gabarit `scripts/hk_config.example.json`.
+- Profil **hk** : paramètres **STABLES figés** (manager = Jean-Loup, taux perso ARMAND
+  1,7 %/CHRIS 2,0 %, paliers pool 0,3/0,8/1,5/2,2 %, manager 1,4 %/0,8 %) dans
+  `scripts/hk_config.example.json`. **Ne demander chaque mois que** l'**objectif magasin**
+  et les **objectifs par vendeur**.
 **Done when:** le profil est choisi et le mois (+ taux/TVA/devise, et paramètres hk le cas
 échéant) sont fixés dans des **cellules labellisées**.
 

@@ -30,21 +30,21 @@ Trois briques :
 - Vendeur : `commission personnelle + commission pool`.
 - Manager : `commission manager (JL)` seule.
 
-## Paramètres (à fournir chaque mois)
+## Paramètres
 
-Hors du fichier « Detailed sales » → bloc d'hypothèses (issu de la légende du payroll +
-saisie mensuelle) :
+Hors du fichier « Detailed sales ». **Bloc STABLE** (figé, confirmé — rarement modifié) +
+**saisie MENSUELLE** (objectifs). Gabarit : `scripts/hk_config.example.json`.
 
-| Paramètre | Source | Ex. mai 2026 |
+| Paramètre | Nature | Valeur |
 |---|---|---|
-| Objectif magasin | saisi | 728 000 |
-| Taux perso par vendeur | légende payroll | ARMAND 1,7 % · CHRIS 2,0 % |
-| Objectif par vendeur (info) | saisi | ARMAND 290 000 · CHRIS 198 000 |
-| Paliers pool | légende (stable) | 0,3 / 0,8 / 1,5 / 2,2 % |
-| Taux manager (atteint / non) | légende (stable) | 1,4 % / 0,8 % |
-| Manager | configuré | JEAN-LOUP |
+| Manager | **stable** | JEAN-LOUP |
+| Taux perso par vendeur | **stable** | ARMAND 1,7 % · CHRIS 2,0 % |
+| Paliers pool | **stable** | 0,3 / 0,8 / 1,5 / 2,2 % |
+| Taux manager (atteint / non) | **stable** | 1,4 % / 0,8 % |
+| Objectif magasin | **mensuel** | ex. mai 2026 : 728 000 |
+| Objectif par vendeur (info) | **mensuel** | ex. ARMAND 290 000 · CHRIS 198 000 |
 
-Un gabarit JSON est fourni : `scripts/hk_config.example.json`.
+→ Chaque mois, ne mettre à jour que **l'objectif magasin** et **les objectifs par vendeur**.
 
 ## Formules Excel (placer dans un onglet `Comm`)
 
