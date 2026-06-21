@@ -1,0 +1,37 @@
+name: Package skills
+
+# Builds an uploadable .zip for every skill so an Org Owner can publish it to
+# claude.ai (Organization settings ▸ Skills). Runs on push to the default branch
+# and on every release; the .zip artifacts are attached to the workflow run.
+
+on:
+  push:
+    branches: [main]
+    paths: ["skills/**"]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build skill zips
+        run: |
+          sudo apt-get update -y && sudo apt-get install -y zip
+          chmod +x scripts/package_skill.sh
+          scripts/package_skill.sh
+
+      - name: Upload skill packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: skill-packages
+          path: dist/*.zip
+
+      - name: Attach zips to the release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.zip

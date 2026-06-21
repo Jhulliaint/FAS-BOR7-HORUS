@@ -1,0 +1,13 @@
+{
+  "_comment": "Hong Kong / Asia-Pacific commission scheme. Two blocks: STABLE (rarely changes — manager, per-staff personal rates, pool tiers, manager rates) and MONTHLY (enter each month — store_target + per-staff target$). Staff names matched case-insensitively. The STABLE values below are the confirmed defaults.",
+
+  "manager": "JEAN-LOUP",
+  "personal_rate": { "ARMAND": 0.017, "CHRIS": 0.02 },
+  "pool_tiers": [[0.60, 0.003], [0.80, 0.008], [1.00, 0.015], [null, 0.022]],
+  "jl_rate_reached": 0.014,
+  "jl_rate_not": 0.008,
+
+  "_monthly": "↓ update these every month ↓",
+  "store_target": 728000,
+  "target": { "ARMAND": 290000, "CHRIS": 198000, "JEAN-LOUP": 0 }
+}

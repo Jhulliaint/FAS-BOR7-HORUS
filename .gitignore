@@ -1,0 +1,13 @@
+# Build output (generated, not committed — may contain client data)
+/dist/
+
+# Python
+__pycache__/
+*.pyc
+
+# OS / editor
+.DS_Store
+*.swp
+
+# LibreOffice / temp
+.~lock.*#
