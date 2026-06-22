@@ -52,13 +52,15 @@ ressemble pas à un « nom prénom » (ex. *SHOE BOXES*).
 
 3 paires (la boîte BTE0106 est ignorée) :
 
-| BAR CODE | Model | Material (Ensemble/Set) | Color | Piping (Passepoil) | Size | Réf |
+| BAR CODE | Model | Material | Color | Piping (FR → liste EN) | Size | Réf |
 |---|---|---|---|---|---|---|
-| `ARB30042026001` | ARCA BOUCLE | Box Calf → CALF | Ardillat → ARDILLAT | Cuivre | 10.5 | ARB299SPE |
-| `ARC30042026001` | ARCA | Box Calf → CALF | Ardillat → ARDILLAT | Marron Moyen | 9 | ARC201ARD001 |
-| `BEL30042026001` | BELLA | Box Calf → CALF | Ardillat → ARDILLAT | Cuivre | 9.5 | BEL299SPE |
+| `ARB30042026001` | ARCA BOUCLE | Box Calf → CALF | Ardillat → ARDILLAT | Cuivre → **BRONZE** | 10.5 | ARB299SPE |
+| `ARC30042026001` | ARCA | Box Calf → CALF | Ardillat → ARDILLAT | Marron Moyen → **MIDDLE BROWN** | 9 | ARC201ARD001 |
+| `BEL30042026001` | BELLA | Box Calf → CALF | Ardillat → ARDILLAT | Cuivre → **BRONZE** | 9.5 | BEL299SPE |
 
-Clients à affecter (étape 6) : DAVID KNAFO, THIERRY AKA, MINA OFORIOKUMA.
+→ écrites en `Main products!A6232:AC6234` (1ʳᵉ ligne vide = 6232 ; Last = PULLMAN ;
+L = STOCK ; P = 30/04/2026 ; Q = FACTORY). Clients à affecter (étape 6) :
+DAVID KNAFO, THIERRY AKA, MINA OFORIOKUMA.
 
 > Reproductible avec `scripts/parse_bl.py "BL.pdf"`. Les valeurs Material/Color/Piping/
 > Patina/Model/Last doivent ensuite être **normalisées contre les listes du classeur**

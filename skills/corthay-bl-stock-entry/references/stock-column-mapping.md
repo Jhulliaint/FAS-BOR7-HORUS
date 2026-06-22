@@ -1,6 +1,12 @@
 # Correspondance colonnes — onglet « Main products » (tableau STOCK, A:AC)
 
+> **Vérifié sur le classeur réel.** L'onglet s'appelle **`Main products `** (avec un
+> **espace final** — le cibler en comparant le nom *sans espaces*). Les données sont un
+> **tableau Excel nommé `STOCK`** (réf A6:AC7510) : écrire une nouvelle ligne **à
+> l'intérieur** du tableau **propage automatiquement** les colonnes formules.
+
 En-têtes **ligne 6**, données à partir de la **ligne 7**. **Une paire = une ligne.**
+La 1ʳᵉ ligne vide se détecte sur la colonne **E (Model)** (au moment du test : ligne **6232**).
 
 | Col | Champ | Quoi écrire |
 |---|---|---|
@@ -37,16 +43,37 @@ En-têtes **ligne 6**, données à partir de la **ligne 7**. **Une paire = une l
 **A, B, O, R, U, V, Y** contiennent des formules de la table qui se propagent
 automatiquement. Y écrire casserait la table.
 
-## Normalisation (via les listes du classeur)
+## Normalisation (via les listes du classeur — onglet `List`)
 
-Toujours convertir les libellés du BL vers les **valeurs exactes des listes** du classeur
-(onglet de listes / validation) **avant d'écrire** :
+Les listes sont des **tableaux Excel** sur l'onglet **`List`** : `MODEL` (col C, +`CATEGORY`
+col E), `LAST` (G), `MATERIAL` (I), `COLOR` (K), `PATINA` (M), `PIPING` (O), `SIZE` (Q).
+Toujours convertir les libellés du BL vers les **valeurs exactes de ces listes** **avant
+d'écrire**.
+
+> ⚠️ **Les listes sont en ANGLAIS, le BL est en FRANÇAIS** → traduire FR→EN.
+> (Le `CATEGORY` (col B) est rempli automatiquement par XLOOKUP sur `MODEL` → si Category
+> reste vide, le Model n'est pas dans la liste.)
+
 - **MODEL** : retirer matière/forme/finition du nom (« ARCA CALF Pullman Ardillat pp MB »
-  → `ARCA`).
-- **MATERIAL** : « Box Calf » → `CALF`, etc.
-- **COLOR** : « Ardillat » → `ARDILLAT`, etc.
-- **PIPING** : passepoil FR → valeur PIPING (ex. « Marron Moyen », « Cuivre »).
-- **PATINA** : uniquement si une patine est explicitement nommée.
+  → `ARCA` ; « ARCA BOUCLE Pullman SP » → `ARCA BOUCLE`). *(vérifié : ARCA, ARCA BOUCLE,
+  BELLA, BELT C existent → Category « CITY SHOES »/« BELTS ».)*
+- **MATERIAL** : « Box Calf » → `CALF` (liste : CALF, CALF/CROCO, SUEDE…).
+- **COLOR** : nom de cuir, souvent identique (« Ardillat » → `ARDILLAT`).
+- **LAST** : `PULLMAN` par défaut ; `SEVRES` si indiqué (liste : PULLMAN, SEVRES, C3,
+  ODEON, SAINT GERMAIN, BEL AIR, MASSAI, XL, YONI).
+- **PATINA** : uniquement si une patine est explicitement nommée (≠ couleur de cuir).
+- **PIPING** : liste **en anglais** (BLACK, BURGUNDY, DARK BROWN, GOLD, GREEN ANIS, GREY,
+  LILA, MIDDLE BROWN, PURPLE, RED, WHITE, NEON YELLOW, NEON PINK, BRONZE, CREAM, OTHER).
+  Le BL donne le passepoil **en français** → mapper :
+
+  | BL (français) | PIPING (liste) | | BL (français) | PIPING |
+  |---|---|---|---|---|
+  | Noir | BLACK | | **Cuivre** | **BRONZE** |
+  | Bordeaux | BURGUNDY | | **Marron Moyen** | **MIDDLE BROWN** |
+  | Marron Foncé | DARK BROWN | | Or | GOLD |
+  | Vert Anis | GREEN ANIS | | Gris | GREY |
+  | Rouge | RED | | Blanc | WHITE |
+  | Violet | PURPLE | | Crème | CREAM |
 
 Si une valeur du BL ne correspond à **aucune** entrée de la liste : **proposer la plus
 proche et demander confirmation** (ne pas inventer). Si le **modèle** est absent de MODEL :

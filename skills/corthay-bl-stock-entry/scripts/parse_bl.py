@@ -25,6 +25,39 @@ PREFIX_EXCEPTIONS = {"BELT C": "BTC"}
 STRIP_FROM_MODEL = ("pullman", "sevres", "sévres", "sevre", "sévre", "sp", "spe",
                     "calf", "suede", "ardillat", "pp", "mb")
 
+# The workbook lists (PIPING, COLOR, MATERIAL...) are in ENGLISH; the BL is in French.
+# Map common FR piping terms to the English PIPING list. Unknown -> confirm vs the list.
+PIPING_FR_EN = {
+    "noir": "BLACK", "bordeaux": "BURGUNDY", "marron fonce": "DARK BROWN",
+    "or": "GOLD", "vert anis": "GREEN ANIS", "gris": "GREY", "lila": "LILA",
+    "lilas": "LILA", "marron moyen": "MIDDLE BROWN", "violet": "PURPLE",
+    "rouge": "RED", "blanc": "WHITE", "jaune neon": "NEON YELLOW",
+    "rose neon": "NEON PINK", "cuivre": "BRONZE", "creme": "CREAM",
+}
+
+
+def _ascii(s):
+    import unicodedata
+    return unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower().strip()
+
+
+def norm_piping(raw):
+    """'Passepoil Cuivre' -> ('BRONZE', True). Returns (value, confident)."""
+    if not raw:
+        return None, True
+    t = _ascii(re.sub(r"(?i)passepoil/?(piping)?\s*", "", raw))
+    return (PIPING_FR_EN.get(t, raw.strip().upper()), t in PIPING_FR_EN)
+
+
+def norm_material_color(ensemble):
+    """'Box Calf Ardillat' -> ('CALF', 'ARDILLAT') (preview; confirm vs workbook lists)."""
+    if not ensemble:
+        return None, None
+    low = _ascii(ensemble)
+    mat = "CALF" if "calf" in low else ("SUEDE" if ("suede" in low or "daim" in low) else None)
+    color = ensemble.strip().split()[-1].upper()  # trailing token = leather color
+    return mat, color
+
 
 def extract_text(path):
     from pdfminer.high_level import extract_text
@@ -129,6 +162,10 @@ def build_rows(path):
         counter[pfx] = counter.get(pfx, 0) + 1
         a["prefix"] = pfx
         a["barcode"] = f"{pfx}{h['date_ddmmyyyy']}{counter[pfx]:03d}"
+        # preview normalisation (confirm against workbook lists at runtime)
+        a["material"], a["color"] = norm_material_color(a["ensemble_set"])
+        a["piping"], a["piping_confident"] = norm_piping(a["piping_raw"])
+        a["last"] = "PULLMAN"  # default; SEVRES only if the BL says so
     return {"header": h, "clients": client_names(txt), "articles": arts}
 
 
@@ -137,9 +174,11 @@ if __name__ == "__main__":
     h = res["header"]
     print(f"BL #{h['bl_number']}  date={h['date_slash']} ({h['date_ddmmyyyy']})  store={h['store']}")
     print(f"Clients (Commande client): {res['clients']}")
-    print(f"\n{'BARCODE':<16}{'MODEL':<14}{'SIZE':<6}{'ENSEMBLE/SET':<22}{'PIPING':<22}REF")
+    print(f"\nColonnes à écrire (E,F,G,H,J,K + D barcode ; normalisation à confirmer vs listes du classeur):")
+    print(f"{'D BARCODE':<16}{'E MODEL':<13}{'F MAT':<6}{'G COLOR':<10}{'H LAST':<8}{'J PIPING':<12}{'K SIZE':<6}REF")
     for a in res["articles"]:
-        print(f"{a['barcode'] or '?':<16}{a['model'][:14]:<14}{(a['size'] or '?'):<6}"
-              f"{(a['ensemble_set'] or '')[:22]:<22}{(a['piping_raw'] or '')[:22]:<22}{a['ref']}")
+        warn = "" if a.get("piping_confident", True) else "  ⚠piping?"
+        print(f"{a['barcode'] or '?':<16}{a['model'][:13]:<13}{(a['material'] or '?'):<6}"
+              f"{(a['color'] or '?'):<10}{a['last']:<8}{(a['piping'] or '?'):<12}{(a['size'] or '?'):<6}{a['ref']}{warn}")
     print(f"\n{len(res['articles'])} stock line(s).  JSON:")
     print(json.dumps(res, ensure_ascii=False))

@@ -13,10 +13,14 @@ description: >-
 # Corthay BL → entrée en stock (Main products)
 
 Quand l'utilisateur **soumet un PDF de BL Corthay** (MAGE SAS / Mage Paris), le traiter
-**automatiquement** comme une **entrée en stock VOLNEY** dans l'onglet **« Main products »**
-(tableau STOCK, colonnes **A:AC**, en-têtes ligne 6, données à partir de la ligne 7).
-Procéder **sans reposer de questions**, sauf les cas explicitement listés (« Cas où
-demander »).
+**automatiquement** comme une **entrée en stock VOLNEY** dans l'onglet **`Main products `**
+(⚠️ **espace final** dans le nom ; tableau Excel **`STOCK`**, colonnes **A:AC**, en-têtes
+ligne 6, données à partir de la ligne 7). Procéder **sans reposer de questions**, sauf les
+cas explicitement listés (« Cas où demander »).
+
+Les valeurs sont **normalisées contre les listes du classeur** (onglet `List` : MODEL,
+MATERIAL, COLOR, PATINA, PIPING, LAST). **Les listes sont en anglais, le BL en français**
+→ traduire (ex. Passepoil **Cuivre → BRONZE**, **Marron Moyen → MIDDLE BROWN**).
 
 Une **paire de chaussures = une ligne**. Ignorer les boîtes, semelles, talons, lacets,
 élastiques, bouts fer, patins.
@@ -46,15 +50,17 @@ python3 scripts/parse_bl.py "BL.pdf"      # nécessite : pip install pdfminer.si
 ```
 
 Il renvoie : date + n° de BL, magasin, les lignes chaussures (réf, modèle, Ensemble/Set,
-Passepoil, taille), le **BAR CODE** interne par ligne, et les **noms clients** de la zone
-« Commande client ». Sortie validée sur le BL #3895 :
+Passepoil, taille), le **BAR CODE** interne, la normalisation FR→EN, et les **noms
+clients**. **Validé de bout en bout** sur le BL #3895 **contre le classeur réel** (1ʳᵉ
+ligne vide détectée = 6232, modèles présents dans MODEL) :
 
 ```
-BL #3895  date=30/04/2026 (30042026)  store=VOLNEY
-Clients: ['DAVID KNAFO', 'THIERRY AKA', 'MINA OFORIOKUMA']
-ARB30042026001  ARCA BOUCLE  10.5  Box Calf Ardillat  Passepoil Cuivre        ARB299SPE
-ARC30042026001  ARCA          9    Box Calf Ardillat  Passepoil Marron Moyen  ARC201ARD001
-BEL30042026001  BELLA         9.5  Box Calf Ardillat  Passepoil Cuivre        BEL299SPE
+BL #3895  date=30/04/2026  store=VOLNEY   ->  Main products!A6232:AC6234
+ROW   D BARCODE        E MODEL      F     G COLOR   H LAST   J PIPING       K     L      P DATE      Q
+6232  ARB30042026001   ARCA BOUCLE  CALF  ARDILLAT  PULLMAN  BRONZE         10.5  STOCK  30/04/2026  FACTORY
+6233  ARC30042026001   ARCA         CALF  ARDILLAT  PULLMAN  MIDDLE BROWN   9     STOCK  30/04/2026  FACTORY
+6234  BEL30042026001   BELLA        CALF  ARDILLAT  PULLMAN  BRONZE         9.5   STOCK  30/04/2026  FACTORY
+Clients (étape 6): DAVID KNAFO, THIERRY AKA, MINA OFORIOKUMA
 ```
 (Toujours **normaliser** Model/Material/Color/Piping/Patina/Last contre les **listes du
 classeur** — cf. `stock-column-mapping.md` — avant d'écrire.)
